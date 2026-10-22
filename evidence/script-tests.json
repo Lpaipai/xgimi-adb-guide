@@ -1,0 +1,78 @@
+{
+  "kind": "isolated_simulation",
+  "device_test": false,
+  "cases": [
+    {
+      "case": "check",
+      "passed": true
+    },
+    {
+      "case": "success",
+      "passed": true
+    },
+    {
+      "case": "missing_usb",
+      "passed": true
+    },
+    {
+      "case": "enforcing",
+      "passed": true
+    },
+    {
+      "case": "wrong_sdk",
+      "passed": true
+    },
+    {
+      "case": "wrong_firmware",
+      "passed": true
+    },
+    {
+      "case": "already_attempted",
+      "passed": true
+    },
+    {
+      "case": "port_rejected",
+      "passed": true
+    },
+    {
+      "case": "persist_rejected",
+      "passed": true
+    },
+    {
+      "case": "daemon_failed",
+      "passed": true
+    },
+    {
+      "case": "restart_rejected",
+      "passed": true
+    },
+    {
+      "case": "restart_ignored",
+      "passed": true
+    },
+    {
+      "case": "pid_pending",
+      "passed": true
+    },
+    {
+      "case": "off",
+      "passed": true
+    },
+    {
+      "case": "restore",
+      "passed": true
+    },
+    {
+      "case": "missing_backup",
+      "passed": true
+    },
+    {
+      "case": "invalid_backup",
+      "passed": true
+    },
+    {
+      "case": "bad_mode",
+      "passed": true
+    }
+  ]
+}

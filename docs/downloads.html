@@ -1,0 +1,48 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>极米 NEW Z6X ADB 图文教程</title><style>
+:root{color-scheme:light;font-family:"Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:#142c40;background:#eef3f7}
+*{box-sizing:border-box} body{margin:0} .bar{background:#0a1d2e;color:#bcd5e8;padding:18px 28px;font-size:14px;letter-spacing:.04em}
+.bar a{color:#6de0d8;text-decoration:none} main{max-width:980px;margin:36px auto 70px;padding:40px 52px 54px;background:white;border:1px solid #d7e3ec;border-radius:22px;box-shadow:0 14px 45px #1939510a}
+h1{font-size:34px;line-height:1.4;letter-spacing:-.03em;margin:0 0 28px} h2{font-size:25px;margin:52px 0 18px;padding-bottom:12px;border-bottom:2px solid #e6eef4;color:#143d59}
+h3{font-size:20px} p,li{font-size:17px;line-height:1.95} p{margin:17px 0} a{color:#076a93;text-underline-offset:3px} img{width:100%;height:auto;border-radius:13px;display:block;margin:24px 0}
+strong{font-weight:700;color:#103c59} ul,ol{padding-left:25px} li{margin:8px 0} pre{background:#0a1d2e;color:#dbedf7;border-radius:12px;padding:22px;overflow-x:auto;line-height:1.7;font-size:15px}
+code{font-family:Consolas,"Microsoft YaHei",monospace;overflow-wrap:anywhere} :not(pre)>code{background:#edf4f8;padding:2px 5px;border-radius:4px;font-size:.92em}
+.table-wrap{overflow-x:auto;margin:24px 0} table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.75} td,th{padding:13px 15px;text-align:left;border:1px solid #d7e3ec;vertical-align:top} th{background:#eaf3f7} tr:nth-child(even){background:#f8fbfc}
+blockquote{margin:24px 0;padding:5px 22px;border-left:4px solid #36aaa7;background:#edf8f7;border-radius:0 12px 12px 0} footer{color:#61798d;border-top:1px solid #d7e3ec;padding-top:22px;margin-top:42px;font-size:14px;line-height:1.8}
+@media(max-width:650px){.bar{padding:14px 18px;font-size:12px}main{margin:0;padding:25px 19px 35px;border:none;border-radius:0;box-shadow:none}h1{font-size:27px}h2{font-size:23px;margin-top:40px}p,li{font-size:16px}pre{padding:16px;font-size:13px}td,th{padding:10px;min-width:120px}img{border-radius:8px}}
+@media print{body{background:white}.bar{display:none}main{max-width:none;border:0;box-shadow:none;padding:0;margin:0}h2{break-after:avoid}pre,table,img{break-inside:avoid}a{color:inherit}}
+</style></head><body><div class="bar">LPAIPAI / 实机记录 · <a href="https://github.com/Lpaipai/xgimi-adb-guide">GitHub 仓库与工具下载</a></div><main><h1 id="下载与校验">下载与校验</h1>
+<p>本仓库只发布原创脚本、文字和必要配图，不重新打包第三方 APK 或厂商系统文件。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>工具</th>
+<th>版本 / 下载</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>App Manager</td>
+<td><a href="https://github.com/MuntashirAkon/AppManager/releases/tag/v4.1.1">4.1.1 发布页</a>；<a href="https://github.com/MuntashirAkon/AppManager/releases/download/v4.1.1/AppManager_v4.1.1.apk">单 APK</a></td>
+<td>投影仪本地终端与文件管理</td>
+</tr>
+<tr>
+<td>Android SDK Platform Tools</td>
+<td><a href="https://developer.android.com/tools/releases/platform-tools">Android 官方下载页</a></td>
+<td>电脑端 ADB；Windows 用户选 Windows 版</td>
+</tr>
+<tr>
+<td>本教程工具包</td>
+<td><a href="https://github.com/Lpaipai/xgimi-adb-guide/releases">GitHub Releases</a></td>
+<td>脚本、电脑连接工具、图文说明</td>
+</tr>
+</tbody></table></div>
+<p>App Manager 单 APK 的 SHA-256（2026-10-22 对照上游 Release digest 与本地文件一致）：</p>
+<pre><code class="language-text">2540d6d9352acd8b04d6210140630a380abb1bc46ad4745c89ad97603dee3c40
+</code></pre>
+<p>PowerShell 检查示例：</p>
+<pre><code class="language-powershell">Get-FileHash .\AppManager_v4.1.1.apk -Algorithm SHA256
+</code></pre>
+<p>如果为投影仪识别改名为 <code>.apk1</code>，哈希应保持相同。<code>.apks</code> 则是另一种打包格式，不能靠改名当作单 APK 使用。</p>
+<p>Platform Tools 的最新版可能变化，因此不把某个过期下载包冒充当前版本。请使用官网；本次实测的具体 ADB 版本记录在验证记录中。</p>
+<p>安装脚本不需要 Activity Launcher、Termux 或额外“ADB 开关 APK”。Activity Launcher 曾用于探索隐藏入口，不是最终连接流程的必要依赖。</p>
+<footer>实测机型：NEW Z6X / N111 · Android 8 · v12.15.214<br>教程与工具：liaoweipeng1 · 记录日期：2026-10-22<br>界面截图用于说明实际操作，软件图标及背景画面归各自权利人所有。</footer></main></body></html>

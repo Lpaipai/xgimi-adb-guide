@@ -1,0 +1,69 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>极米 NEW Z6X ADB 图文教程</title><style>
+:root{color-scheme:light;font-family:"Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:#142c40;background:#eef3f7}
+*{box-sizing:border-box} body{margin:0} .bar{background:#0a1d2e;color:#bcd5e8;padding:18px 28px;font-size:14px;letter-spacing:.04em}
+.bar a{color:#6de0d8;text-decoration:none} main{max-width:980px;margin:36px auto 70px;padding:40px 52px 54px;background:white;border:1px solid #d7e3ec;border-radius:22px;box-shadow:0 14px 45px #1939510a}
+h1{font-size:34px;line-height:1.4;letter-spacing:-.03em;margin:0 0 28px} h2{font-size:25px;margin:52px 0 18px;padding-bottom:12px;border-bottom:2px solid #e6eef4;color:#143d59}
+h3{font-size:20px} p,li{font-size:17px;line-height:1.95} p{margin:17px 0} a{color:#076a93;text-underline-offset:3px} img{width:100%;height:auto;border-radius:13px;display:block;margin:24px 0}
+strong{font-weight:700;color:#103c59} ul,ol{padding-left:25px} li{margin:8px 0} pre{background:#0a1d2e;color:#dbedf7;border-radius:12px;padding:22px;overflow-x:auto;line-height:1.7;font-size:15px}
+code{font-family:Consolas,"Microsoft YaHei",monospace;overflow-wrap:anywhere} :not(pre)>code{background:#edf4f8;padding:2px 5px;border-radius:4px;font-size:.92em}
+.table-wrap{overflow-x:auto;margin:24px 0} table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.75} td,th{padding:13px 15px;text-align:left;border:1px solid #d7e3ec;vertical-align:top} th{background:#eaf3f7} tr:nth-child(even){background:#f8fbfc}
+blockquote{margin:24px 0;padding:5px 22px;border-left:4px solid #36aaa7;background:#edf8f7;border-radius:0 12px 12px 0} footer{color:#61798d;border-top:1px solid #d7e3ec;padding-top:22px;margin-top:42px;font-size:14px;line-height:1.8}
+@media(max-width:650px){.bar{padding:14px 18px;font-size:12px}main{margin:0;padding:25px 19px 35px;border:none;border-radius:0;box-shadow:none}h1{font-size:27px}h2{font-size:23px;margin-top:40px}p,li{font-size:16px}pre{padding:16px;font-size:13px}td,th{padding:10px;min-width:120px}img{border-radius:8px}}
+@media print{body{background:white}.bar{display:none}main{max-width:none;border:0;box-shadow:none;padding:0;margin:0}h2{break-after:avoid}pre,table,img{break-inside:avoid}a{color:inherit}}
+</style></head><body><div class="bar">LPAIPAI / 实机记录 · <a href="https://github.com/Lpaipai/xgimi-adb-guide">GitHub 仓库与工具下载</a></div><main><h1 id="为什么最后能连上把实测与解释分开">为什么最后能连上：把实测与解释分开</h1>
+<h2 id="已经观察到的事实">已经观察到的事实</h2>
+<ol>
+<li>最初的本地终端以普通应用 UID 运行，直接读写部分全局设置会遇到权限拒绝。</li>
+<li>本机原有 SELinux 为 Permissive，相关 <code>setprop</code> 请求被系统接受；脚本每次修改后都会读回核对。不能把 Permissive 单独当作“所有命令都有权限”。</li>
+<li>只启动原生 adbd 时，电脑曾停在 <code>unauthorized</code>。</li>
+<li>设置持久 ADB 配置并重启框架后，电脑实际执行了只读命令，得到 <code>uid=2000(shell)</code>。</li>
+<li>整理后的公开脚本又由普通应用终端执行，从 adbd 已停止的状态开启成功，电脑用新密钥完成连接。</li>
+</ol>
+<h2 id="本机厂商代码提供的解释">本机厂商代码提供的解释</h2>
+<p>从设备导出的 <code>services.jar</code> 对应代码中，USB 管理部分存在如下关系：</p>
+<ul>
+<li><code>UsbDeviceManager</code> 在初始化时依据 <code>persist.sys.usb.config</code> 是否含 <code>adb</code> 建立内部 ADB 状态。</li>
+<li><code>UsbDebuggingManager.setAdbEnabled(true)</code> 控制授权 socket 监听。</li>
+<li>本机有效公钥处理分支调用 <code>allowUsbDebugging(true, key)</code>，没有走普通 Android 的确认弹窗流程。</li>
+</ul>
+<p>因此，“原生 adbd 已启动，但框架仍使用旧的关闭状态”能解释当时 <code>running</code> 与 <code>unauthorized</code> 并存的现象。补上持久配置，再重启框架，能够使这两部分一致。<strong>我们没有抓取当时 system_server 的内部内存；根因解释来自代码和干预前后现象，不应写成直接观察到了所有内部状态。</strong></p>
+<p>厂商包的反编译整体存在工具报错；本文只依据可读的特定分支，不声称完整源码恢复。仓库不分发厂商 JAR、ODEX、VDEX、APK 或反编译代码。</p>
+<h2 id="三个属性各做什么">三个属性各做什么</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>属性</th>
+<th>本次设置</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>service.adb.tcp.port</code></td>
+<td><code>5555</code></td>
+<td>告诉 adbd 使用哪个网络端口；它本身不完成电脑授权</td>
+</tr>
+<tr>
+<td><code>sys.usb.config</code></td>
+<td><code>adb</code></td>
+<td>本机 init 根据当前 USB 功能配置启动 adbd</td>
+</tr>
+<tr>
+<td><code>persist.sys.usb.config</code></td>
+<td><code>adb</code></td>
+<td>让框架初始化时读取到 ADB 启用状态</td>
+</tr>
+</tbody></table></div>
+<p><code>ctl.restart zygote</code> 请求 init 重启 Android 运行框架。它会退出应用，不能把它当作无感操作，也不应在循环中执行。公开脚本使用一次性标记、读回检查、失败时尝试恢复属性；返回值不能代替电脑端连接验收。</p>
+<h2 id="为什么RemoteDebug没有解决问题">为什么 RemoteDebug 没有解决问题</h2>
+<p>分析到的 <code>com.xgimi.remote</code> 路径是厂商服务器协调的 SSH 诊断流程。按钮名字里有“调试”，并不代表它启动本地 <code>adbd:5555</code>。所以服务器繁忙的问题和这次最终成功的局域网 ADB 流程，应分开理解。</p>
+<h2 id="权限与适用范围">权限与适用范围</h2>
+<p>没有刷机、安装 su、关闭 ADB 认证或注入他人的授权密钥。最终是 shell UID 2000，仍受 Android 权限限制。原厂的自动授权行为也意味着同一可达网络中的其他电脑可能获得连接，因此必须限制使用网络并在不用时关闭。</p>
+<p>公开脚本的固件检查是精确匹配，不意味着相同硬件代号的所有产品都适用。恢复出厂的新机器、别的固件、持续断电后是否自动保持网络 ADB，都只能在相应测试后再声明。</p>
+<h2 id="原始资料">原始资料</h2>
+<ul>
+<li><a href="https://developer.android.com/tools/adb">Android 官方 ADB 文档</a>：客户端、服务端、设备守护进程和连接验收的通用说明；不能据其默认授权弹窗描述推定本机厂商实现。</li>
+<li><a href="https://github.com/aosp-mirror/platform_system_core/blob/android-8.0.0_r1/init/property_service.cpp">Android 8 init 属性服务</a>：<code>ctl.*</code> 控制消息背景。</li>
+<li><a href="https://github.com/aosp-mirror/platform_system_core/blob/android-8.0.0_r1/rootdir/init.zygote64_32.rc">Android 8 zygote 服务配置</a>：框架服务背景。</li>
+<li>本机验证摘要：<a href="../evidence/validation.html">evidence/validation.md</a>。AOSP 仅作背景，本机行为以实际记录为准。</li>
+</ul>
+<footer>实测机型：NEW Z6X / N111 · Android 8 · v12.15.214<br>教程与工具：liaoweipeng1 · 记录日期：2026-10-22<br>界面截图用于说明实际操作，软件图标及背景画面归各自权利人所有。</footer></main></body></html>

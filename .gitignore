@@ -1,0 +1,12 @@
+.runtime/
+platform-tools/
+output/
+__pycache__/
+tests/mock-*/
+*.apk
+*.apk1
+*.apks
+*.odex
+*.vdex
+*.tar*
+adbkey*

@@ -1,0 +1,75 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>极米 NEW Z6X ADB 图文教程</title><style>
+:root{color-scheme:light;font-family:"Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:#142c40;background:#eef3f7}
+*{box-sizing:border-box} body{margin:0} .bar{background:#0a1d2e;color:#bcd5e8;padding:18px 28px;font-size:14px;letter-spacing:.04em}
+.bar a{color:#6de0d8;text-decoration:none} main{max-width:980px;margin:36px auto 70px;padding:40px 52px 54px;background:white;border:1px solid #d7e3ec;border-radius:22px;box-shadow:0 14px 45px #1939510a}
+h1{font-size:34px;line-height:1.4;letter-spacing:-.03em;margin:0 0 28px} h2{font-size:25px;margin:52px 0 18px;padding-bottom:12px;border-bottom:2px solid #e6eef4;color:#143d59}
+h3{font-size:20px} p,li{font-size:17px;line-height:1.95} p{margin:17px 0} a{color:#076a93;text-underline-offset:3px} img{width:100%;height:auto;border-radius:13px;display:block;margin:24px 0}
+strong{font-weight:700;color:#103c59} ul,ol{padding-left:25px} li{margin:8px 0} pre{background:#0a1d2e;color:#dbedf7;border-radius:12px;padding:22px;overflow-x:auto;line-height:1.7;font-size:15px}
+code{font-family:Consolas,"Microsoft YaHei",monospace;overflow-wrap:anywhere} :not(pre)>code{background:#edf4f8;padding:2px 5px;border-radius:4px;font-size:.92em}
+.table-wrap{overflow-x:auto;margin:24px 0} table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.75} td,th{padding:13px 15px;text-align:left;border:1px solid #d7e3ec;vertical-align:top} th{background:#eaf3f7} tr:nth-child(even){background:#f8fbfc}
+blockquote{margin:24px 0;padding:5px 22px;border-left:4px solid #36aaa7;background:#edf8f7;border-radius:0 12px 12px 0} footer{color:#61798d;border-top:1px solid #d7e3ec;padding-top:22px;margin-top:42px;font-size:14px;line-height:1.8}
+@media(max-width:650px){.bar{padding:14px 18px;font-size:12px}main{margin:0;padding:25px 19px 35px;border:none;border-radius:0;box-shadow:none}h1{font-size:27px}h2{font-size:23px;margin-top:40px}p,li{font-size:16px}pre{padding:16px;font-size:13px}td,th{padding:10px;min-width:120px}img{border-radius:8px}}
+@media print{body{background:white}.bar{display:none}main{max-width:none;border:0;box-shadow:none;padding:0;margin:0}h2{break-after:avoid}pre,table,img{break-inside:avoid}a{color:inherit}}
+</style></head><body><div class="bar">LPAIPAI / 实机记录 · <a href="https://github.com/Lpaipai/xgimi-adb-guide">GitHub 仓库与工具下载</a></div><main><h1 id="验证记录与边界">验证记录与边界</h1>
+<p>记录日期：2026-10-22（北京时间）。本文件只保留教程需要的结果，不包含个人设备地址、电脑密钥、MAC、序列号或完整系统导出。</p>
+<h2 id="1原始成功记录2026-10-21">1. 原始成功记录：2026-10-21</h2>
+<p>在完成属性修改和一次 Android 框架重启后，电脑实际执行只读查询，返回：</p>
+<pre><code class="language-text">uid=2000(shell) ... context=u:r:shell:s0
+model: XGIMI TV
+hardware: m7221
+Android: 8.0.0
+global adb_enabled: 1
+init.svc.adbd: running
+persist.sys.usb.config: adb
+sys.usb.config: adb
+</code></pre>
+<p>这是设备端命令返回，不只是端口连通或脚本自报成功。</p>
+<h2 id="2整理后脚本的普通应用终端复现2026-10-22">2. 整理后脚本的普通应用终端复现：2026-10-22</h2>
+<p>本次先使用 ADB 将测试文件送入设备，再通过 App Manager 的界面操作启动本地终端。<strong>文件传输使用了既有连接，实际执行开启脚本的身份是普通应用，不是电脑的 shell。</strong></p>
+<p>私有测试准备脚本在该终端中检查普通应用身份，并把端口设为 <code>-1</code>、两个 USB 配置设为 <code>none</code>，确认 adbd 为 <code>stopped</code> 后调用公开脚本的 <code>enable</code>。这只构造了“服务已关闭”的状态，没有恢复出厂，也没有清除既有授权数据库或证明框架内存与全新开机完全相同。</p>
+<p>实测摘录：</p>
+<pre><code class="language-text">Identity: uid=10040(u0_a40) ... context=u:r:untrusted_app:s0:c512,c768
+Before public script: stopped
+ADB: daemon=stopped persist=none usb=none port=-1
+Before: persist=none usb=none port=-1 pid=16094
+Restarting Android framework ONCE.
+After: system_server pid=29475
+</code></pre>
+<p>框架进程 PID 已变化。随后在电脑教程目录生成一套<strong>新的 ADB 密钥</strong>，以独立服务端口 5047 连接成功：</p>
+<pre><code class="language-text">连接成功：已实际执行设备端命令。
+uid=2000(shell) ... context=u:r:shell:s0
+Xgimi/ironman/ironman:8.0.0/OPR5.170623.014/v12.15.214:user/dev-keys
+</code></pre>
+<p>没有手动接受授权弹窗。新密钥和旧密钥没有公开到本仓库。</p>
+<p>实测电脑工具版本：ADB 1.0.41 / Platform Tools 37.0.1-15733141，Windows。后续电脑连接工具增加了 20 秒超时与错误分类，具体复查结果见本文件更新。</p>
+<p>最终 Windows 工具通过 PowerShell 语法解析，并实测了非法 IP 拒绝、连接被拒绝时的错误输出；新超时包装版本尚未在离线后的投影仪上再次完成成功路径复查。上面的新密钥成功记录来自添加该错误处理前的同一连接流程。</p>
+<h2 id="3模拟检查">3. 模拟检查</h2>
+<p><code>tests/test_script.py</code> 的 18 项隔离模拟通过，结果见 <a href="script-tests.json">script-tests.json</a>：</p>
+<ul>
+<li>默认只读检查；成功路径；USB framework 缺失；Enforcing；SDK 与固件不符。</li>
+<li>重复执行标记；端口和持久属性拒绝；守护进程启动失败。</li>
+<li>框架重启拒绝、忽略、PID 暂不可见。</li>
+<li>关闭；恢复；备份缺失；无效备份数据；未知模式。</li>
+</ul>
+<p>模拟检查确认：失败分支不会无条件继续重启，最多一次重启请求，可恢复分支读回原属性，不执行备份中的文本。<strong>模拟通过不能替代实机通过。</strong></p>
+<h2 id="4关闭与恢复">4. 关闭与恢复</h2>
+<p><code>off</code>、<code>restore</code> 已做隔离模拟，尚未完成这次公开版本的实机闭环。<code>off</code> 仅在确认 adbd 停止后重置本工具的一次性标记；<code>restore</code> 只恢复三个属性，不声称恢复框架内存或撤销历史授权。</p>
+<h2 id="5整机重启测试">5. 整机重启测试</h2>
+<p>开启成功后另行发起了一次整机重启，随后设备未能在原网络地址重新连接；当时连 IP 层可达性也未恢复。<strong>当前不能区分设备未开机、尚未联网或地址变化，不能认定 ADB 持久化失效，也不能宣称“重启后自动连接”已通过。</strong></p>
+<p>因此本版只宣称：指定固件下，本地普通应用终端开启 + 框架重启 + 新电脑密钥连接成功。整机重启后的复连仍待现场状态确认。</p>
+<h2 id="6未验证的场景">6. 未验证的场景</h2>
+<ul>
+<li>全新／恢复出厂后设备。</li>
+<li>其他机型、其他固件、Enforcing 系统。</li>
+<li>断电后自动保持网络端口与授权处理。</li>
+<li>网络隔离、跨网或公网连接。</li>
+</ul>
+<p>不要把本教程扩展为通用提权、刷机或全品牌一键开启工具。</p>
+<h2 id="7文档与发布检查">7. 文档与发布检查</h2>
+<ul>
+<li>图文 HTML 在 1440 px 与 390 px 宽度检查：图片均加载，页面无整体横向溢出；宽表格可局部横向滚动。</li>
+<li>原创说明图与两张设备截图已人工查看。说明图明确标为示意，不伪装成命令执行截图。</li>
+<li>App Manager APK 本地 SHA-256 与上游 Release digest 一致；仅发布官方链接，不打包 APK。</li>
+<li>发布文件未包含 <code>.runtime</code> 密钥目录、设备私有地址、序列号、MAC 或系统导出。</li>
+</ul>
+<footer>实测机型：NEW Z6X / N111 · Android 8 · v12.15.214<br>教程与工具：liaoweipeng1 · 记录日期：2026-10-22<br>界面截图用于说明实际操作，软件图标及背景画面归各自权利人所有。</footer></main></body></html>
