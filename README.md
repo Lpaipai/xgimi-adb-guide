@@ -68,3 +68,11 @@
 先查 [排错表](docs/tutorial.md#常见问题)。提交 Issue 时提供型号、固件、命令输出中的 STOP 信息即可；请遮掉 IP、序列号、MAC、账号等个人信息，不要上传密钥或整份系统备份。
 
 本仓库原创脚本和文字采用 [MIT 许可](LICENSE)。界面截图、第三方软件名称及图标归各自权利人所有。作者：liaoweipeng1；GitHub：Lpaipai。
+
+## 赞助支持
+
+如果这个项目对你有帮助，欢迎自愿赞助，支持后续维护。金额随心，感谢支持！
+
+支持微信支付和支付宝；点击图片可查看原图。
+
+[![微信支付与支付宝赞助码](docs/images/sponsor.png)](docs/images/sponsor.png)
